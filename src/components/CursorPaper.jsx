@@ -14,8 +14,12 @@ export default class CursorPaper extends React.Component {
             lastY: 100,
             radius: 10
         }
+
+        this.polygon = 0
         this.cursor = React.createRef()
         this.canvas = React.createRef()
+
+        this.polygon = 0
     }
 
     componentDidMount() {
@@ -30,6 +34,7 @@ export default class CursorPaper extends React.Component {
     lerp = (a, b, n) => (1 - n) * a + n * b
     map = (value, in_min, in_max, out_min, out_max) => ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
         
+
     // Get clientX, clientY
     onMouseMove = evt => {
         this.setState({
@@ -46,21 +51,21 @@ export default class CursorPaper extends React.Component {
     }
 
     renderPolygon = () => {
-        const polygon = new paper.Path.RegularPolygon(new paper.Point(this.state.clientX, this.state.clientY), 8, this.state.radius)
+        this.polygon = new paper.Path.RegularPolygon(new paper.Point(this.state.clientX, this.state.clientY), 8, this.state.radius)
 
-        polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
-        polygon.strokeWidth = 2
-        polygon.smooth()
+        this.polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
+        this.polygon.strokeWidth = 2
+        this.polygon.smooth()
 
-        const group = new paper.Group([polygon])
+        const group = new paper.Group([this.polygon])
         group.applyMatrix = false
 
-        this.renderNoise(group, polygon)
+        this.renderNoise(group)
     }
 
     // Render Noise
-    renderNoise = (group, polygon) => {
-        polygon.segments.map(() => new SimplexNoise());
+    renderNoise = (group) => {
+        this.polygon.segments.map(() => new SimplexNoise());
         this.animation(group)
     }
 
