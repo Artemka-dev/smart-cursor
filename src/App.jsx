@@ -19,15 +19,7 @@ class App extends React.Component {
     leave = () => {
         this.setState({inBlock: false})
     }
-
-    scaleUp = polygon => {
-        polygon.scale(1.92)
-    }
-
-    scaleDown = polygon => {
-        polygon.scale(0.82)
-    }
-
+    
     render = () => {
         return (
             <div>
