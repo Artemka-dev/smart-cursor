@@ -5,10 +5,10 @@ export const useMousePosition = () => {
 
     React.useEffect(() => {
         const onMouseMove = event => setPosition({x: event.clientX, y: event.clientY})
-        window.addEventListener('mousemove', onMouseMove)
+        document.addEventListener('mousemove', onMouseMove)
 
         return () => {
-            window.removeEventListener("mousemove", onMouseMove)
+            document.removeEventListener("mousemove", onMouseMove)
         }
     }, [])
 

@@ -94,14 +94,19 @@ import SimplexNoise from 'simplex-noise'
 
 
 export default function CursorPaper() {
-    const cursor = React.useCallback(node => node && renderCursor(node))
-    const canvas = React.useCallback(n => n && renderPolygon())
-    const position = useMousePosition()
+    const [state, setState] = React.useState({lastX: 100, lastY: 100})
 
+    const cursor = React.useCallback(node => node && renderCursor(node))
+    const canvas = React.useCallback(node => {
+        if (node !== null) {
+            paper.setup(node)
+            renderPolygon()
+        }
+    })
+    const position = useMousePosition()
     let polygon = 0
     
-    function lerp(a, b, n) {return (1 - n) * a + n * b}
-
+    function lerp(a, b, n) { return (1 - n) * a + n * b}
     function renderCursor(node) {
         node.style.transform = `translate(${position.x}px, ${position.y}px)`
         requestAnimationFrame(() => renderCursor);
@@ -113,25 +118,28 @@ export default function CursorPaper() {
         polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
         polygon.strokeWidth = 2
         polygon.smooth()
+
+        const group = new paper.Group([polygon])
+        group.applyMatrix = false
+        renderNoise()
+        animation(group)
     }
 
-    // function renderNoise(group) {
-    //     polygon.segments.map(() => new SimplexNoise());
-    //     animation(group)
-    // }
+    function renderNoise() {
+        polygon.segments.map(() => new SimplexNoise());
+    }
 
-    // function animation(group) {
-    //     paper.view.onFrame = event => {
+    function animation(group) {
+        paper.view.onFrame = event => {
 
-    //         setState({
-    //             lastX: lerp(state.lastX, position.x, 0.2),
-    //             lastY: lerp(state.lastY, position.y, 0.2)
-    //         })
+            setState({
+                lastX: lerp(state.lastX, position.x, 0.2),
+                lastY: lerp(state.lastY, position.y, 0.2)
+            })
 
-    //         group.position = new paper.Point(state.lastX, state.lastY)
-    //     }
-    // }
-
+            group.position = new paper.Point(state.lastX, state.lastY)
+        }
+    }
 
     return (
         <div>
@@ -140,12 +148,3 @@ export default function CursorPaper() {
         </div>
     )
 }
-
-//         this.polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
-//         this.polygon.strokeWidth = 2
-//         this.polygon.smooth()
-
-//         const group = new paper.Group([this.polygon])
-//         group.applyMatrix = false
-
-//         this.renderNoise(group)
