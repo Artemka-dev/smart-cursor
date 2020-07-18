@@ -1,7 +1,9 @@
 import React from 'react'
+import { useMousePosition } from '../useMousePosition'
 // Labs
 import paper from 'paper'
 import SimplexNoise from 'simplex-noise'
+import { render } from '@testing-library/react'
 
 // export default class CursorPaper extends React.Component {
 //     constructor(props) {
@@ -91,38 +93,26 @@ import SimplexNoise from 'simplex-noise'
 //     }
 // }
 
+
 export default function CursorPaper() {
 
     const cursor = React.useRef()
     const canvas = React.useRef()
-    
-    const [state, setState] = React.useState({
-        clientX: 100,
-        clientY: 100,
-        lastX: 100,
-        lastY: 100
-    })
 
-    React.useEffect(() => {
-        document.addEventListener('mousemove', function(event) {
-            setState({
-                clientX: event.clientX,
-                clientY: event.clientY
-            })
-        })
+    const position = useMousePosition()
 
+    if (cursor.current) {
         renderCursor()
-    })
-    
+    } 
 
     function renderCursor() {
-        cursor.current.style.transform = `translate(${state.clientX}px, ${state.clientY}px)`
+        cursor.current.style.transform = `translate(${position.x}px, ${position.y}px)`
         requestAnimationFrame(renderCursor);
     }
 
     return (
         <div>
-        <div className="cursor cursor--small" ref={cursor}></div>
+            <div className="cursor cursor--small" ref={cursor}></div>
             <canvas ref={canvas} className="cursor cursor--canvas" resize='true'></canvas>
         </div>
     )
