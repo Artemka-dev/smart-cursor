@@ -3,7 +3,6 @@ import { useMousePosition } from '../useMousePosition'
 // Labs
 import paper from 'paper'
 import SimplexNoise from 'simplex-noise'
-import { render } from '@testing-library/react'
 
 // export default class CursorPaper extends React.Component {
 //     constructor(props) {
@@ -95,20 +94,44 @@ import { render } from '@testing-library/react'
 
 
 export default function CursorPaper() {
-
-    const cursor = React.useRef()
-    const canvas = React.useRef()
-
+    const cursor = React.useCallback(node => node && renderCursor(node))
+    const canvas = React.useCallback(n => n && renderPolygon())
     const position = useMousePosition()
 
-    if (cursor.current) {
-        renderCursor()
-    } 
+    let polygon = 0
+    
+    function lerp(a, b, n) {return (1 - n) * a + n * b}
 
-    function renderCursor() {
-        cursor.current.style.transform = `translate(${position.x}px, ${position.y}px)`
-        requestAnimationFrame(renderCursor);
+    function renderCursor(node) {
+        node.style.transform = `translate(${position.x}px, ${position.y}px)`
+        requestAnimationFrame(() => renderCursor);
     }
+
+    function renderPolygon() {
+        polygon = new paper.Path.RegularPolygon(new paper.Point(position.x, position.y), 8, 10)
+    
+        polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
+        polygon.strokeWidth = 2
+        polygon.smooth()
+    }
+
+    // function renderNoise(group) {
+    //     polygon.segments.map(() => new SimplexNoise());
+    //     animation(group)
+    // }
+
+    // function animation(group) {
+    //     paper.view.onFrame = event => {
+
+    //         setState({
+    //             lastX: lerp(state.lastX, position.x, 0.2),
+    //             lastY: lerp(state.lastY, position.y, 0.2)
+    //         })
+
+    //         group.position = new paper.Point(state.lastX, state.lastY)
+    //     }
+    // }
+
 
     return (
         <div>
@@ -117,3 +140,12 @@ export default function CursorPaper() {
         </div>
     )
 }
+
+//         this.polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
+//         this.polygon.strokeWidth = 2
+//         this.polygon.smooth()
+
+//         const group = new paper.Group([this.polygon])
+//         group.applyMatrix = false
+
+//         this.renderNoise(group)
