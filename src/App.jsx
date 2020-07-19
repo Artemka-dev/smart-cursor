@@ -23,9 +23,7 @@ class App extends React.Component {
     render = () => {
         return (
             <div>
-                <CursorPaper />
-
-                <div className="block" ref={this.block} onMouseEnter={this.enter} onMouseLeave={this.leave}></div>
+                <CursorPaper inBlock={this.state.inBlock} />
             </div>
         );
     }

@@ -1,64 +1,72 @@
 import React from 'react'
-import { useMousePosition } from '../useMousePosition'
-// Labs
 import paper from 'paper'
 import SimplexNoise from 'simplex-noise'
 
+export default class CursorPaper extends React.Component {
+    constructor(props) {
+        super(props)
 
-export default function CursorPaper() {
-    const cursor = React.useRef()
-    const canvas = React.useRef()
-    const [state, setState] = React.useState({lastX: 100, lastY: 100})
-    const position = useMousePosition()
+        this.state = {lastX: 100, lastY: 100, x: 100, y: 100}
+        this.cursor = React.createRef()
+        this.canvas = React.createRef()
+        this.block = React.createRef()
+        this.polygon = 0
 
-    let polygon = 0
-
-    renderCursor()
-    renderPolygon()
-    
-    function lerp(a, b, n) { return (1 - n) * a + n * b}
-    function renderCursor() {
-        if (cursor.current) {
-            cursor.current.style.transform = `translate(${position.x}px, ${position.y}px)`
-            requestAnimationFrame(() => renderCursor);
-        }
     }
 
-    function renderPolygon() {
-        paper.setup(canvas.current)
-        polygon = new paper.Path.RegularPolygon(new paper.Point(position.x, position.y), 8, 10)
-    
-        polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
-        polygon.strokeWidth = 2
-        polygon.smooth()
+    lerp = (a, b, n) => (1 - n) * a + n * b
+    componentDidMount() {
+        document.addEventListener('mousemove', event => this.setState({x: event.clientX, y: event.clientY}))
 
-        const group = new paper.Group([polygon])
+        this.renderCursor()
+        this.renderPolygon()
+    }
+
+    enter = () => this.polygon.scale(1.08)
+    leave = () => this.polygon.scale(0.92)
+    
+
+    renderCursor = () => {
+        this.cursor.current.style.transform = `translate(${this.state.x}px, ${this.state.y}px)`
+        requestAnimationFrame(this.renderCursor)
+    }
+
+    renderPolygon = () => {
+        paper.setup(this.canvas.current)
+        this.polygon = new paper.Path.RegularPolygon(new paper.Point(this.state.x, this.state.y), 8, 10)
+    
+        this.polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
+        this.polygon.strokeWidth = 2
+        this.polygon.smooth()
+
+        const group = new paper.Group([this.polygon])
         group.applyMatrix = false
-        
-        renderNoise()
-        animation(group)
+
+        this.polygon.segments.map(() => new SimplexNoise());
+        this.animation(group)
     }
 
-    function renderNoise() {
-        polygon.segments.map(() => new SimplexNoise());
-    }
+    animation = (group) => {
+        paper.view.onFrame = () => {
 
-    function animation(group) {
-        paper.view.onFrame = event => {
-
-            setState({
-                lastX: lerp(state.lastX, position.x, 0.2),
-                lastY: lerp(state.lastY, position.y, 0.2)
+            this.setState({
+                lastX: this.lerp(this.state.lastX, this.state.x, 0.2),
+                lastY: this.lerp(this.state.lastY, this.state.y, 0.2)
             })
 
-            group.position = new paper.Point(state.lastX, state.lastY)
+            group.position = new paper.Point(this.state.lastX, this.state.lastY)
         }
     }
 
-    return (
-        <div>
-            <div className="cursor cursor--small" ref={cursor}></div>
-            <canvas ref={canvas} className="cursor cursor--canvas" resize='true'></canvas>
-        </div>
-    )
+    render = () => {
+        return (
+            <div>
+                <div className="cursor cursor--small" ref={this.cursor}></div>
+                <canvas ref={this.canvas} className="cursor cursor--canvas" resize='true'></canvas>
+
+                <div className="block" ref={this.block} onMouseEnter={this.enter} onMouseLeave={this.leave}></div>
+
+            </div>
+        )
+    }
 }
