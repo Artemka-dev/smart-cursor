@@ -6,25 +6,26 @@ import SimplexNoise from 'simplex-noise'
 
 
 export default function CursorPaper() {
+    const cursor = React.useRef()
+    const canvas = React.useRef()
     const [state, setState] = React.useState({lastX: 100, lastY: 100})
     const position = useMousePosition()
 
-    const cursor = React.useCallback(node => node && renderCursor(node), [state])
-    const canvas = React.useCallback(node => {
-        if (node !== null) {
-            paper.setup(node)
-            renderPolygon()
-        }
-    }, [])
     let polygon = 0
+
+    renderCursor()
+    renderPolygon()
     
     function lerp(a, b, n) { return (1 - n) * a + n * b}
-    function renderCursor(node) {
-        node.style.transform = `translate(${position.x}px, ${position.y}px)`
-        requestAnimationFrame(() => renderCursor);
+    function renderCursor() {
+        if (cursor.current) {
+            cursor.current.style.transform = `translate(${position.x}px, ${position.y}px)`
+            requestAnimationFrame(() => renderCursor);
+        }
     }
 
     function renderPolygon() {
+        paper.setup(canvas.current)
         polygon = new paper.Path.RegularPolygon(new paper.Point(position.x, position.y), 8, 10)
     
         polygon.strokeColor = 'rgba(255, 0, 0, 0.5)'
@@ -33,6 +34,7 @@ export default function CursorPaper() {
 
         const group = new paper.Group([polygon])
         group.applyMatrix = false
+        
         renderNoise()
         animation(group)
     }
